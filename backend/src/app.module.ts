@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { BookingsModule } from './bookings/bookings.module';
 import { envValidationSchema } from './config/env.validation';
 
 type EnvVars = {
@@ -25,6 +26,7 @@ type EnvVars = {
         uri: configService.getOrThrow('MONGODB_URI'),
       }),
     }),
+    BookingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

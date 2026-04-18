@@ -1,0 +1,70 @@
+# Dependencies
+node_modules/
+**/node_modules/
+.pnp.cjs
+.pnp.loader.mjs
+.yarn/cache
+.yarn/install-state.gz
+.yarn/unplugged
+
+# Build / output
+dist/
+**/dist/
+build/
+**/build/
+*.tsbuildinfo
+.next/
+out/
+.nuxt/
+.vite/
+
+# Test / coverage
+coverage/
+**/coverage/
+.nyc_output/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+**/.env
+**/.env.*
+!**/.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Caches & temp
+.cache/
+.parcel-cache/
+.turbo/
+.temp/
+.tmp/
+*.tmp
+*.temp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editors
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# Debug / diagnostics
+report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json

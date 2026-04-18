@@ -25,6 +25,17 @@
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
+### Hospitality bookings — environment & sample data
+
+1. Copy `.env.example` to `.env` and set `MONGODB_URI` (local MongoDB or Atlas).
+2. Seed the `bookings` collection with mixed statuses (`pending`, `confirmed`, `checked_in`, `checked_out`, `cancelled`):
+
+```bash
+npm run seed
+```
+
+This **removes all existing documents** in `bookings`, then inserts seven sample rows (relative dates from “today”). Run only when you are fine resetting that collection.
+
 ## Project setup
 
 ```bash
