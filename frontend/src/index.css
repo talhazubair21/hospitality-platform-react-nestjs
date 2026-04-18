@@ -1,6 +1,26 @@
 @import 'tailwindcss';
 
-* {
-  margin: 0px;
-  padding: 0px;
+/* Ensure all templates and source files are scanned for class names (Tailwind v4) */
+@source "../index.html";
+@source "./**/*.{js,ts,jsx,tsx}";
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+@layer base {
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    margin: 0;
+    @apply min-h-screen text-slate-800;
+    font-family:
+      ui-sans-serif, system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+      sans-serif;
+  }
 }
