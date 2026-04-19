@@ -73,15 +73,19 @@ export async function updateBookingStatus(
   id: string,
   status: BookingStatus,
 ): Promise<Booking> {
-  const { data } = await apiClient.patch<RawBooking>(
-    `/bookings/${id}/status`,
-    { status },
-  );
+  const { data } = await apiClient.patch<RawBooking>(`/bookings/${id}/status`, {
+    status,
+  });
   return normalizeBooking(data);
 }
 
 type BookingsQueryOptions = Omit<
-  UseQueryOptions<Booking[], Error, Booking[], ReturnType<typeof bookingKeys.list>>,
+  UseQueryOptions<
+    Booking[],
+    Error,
+    Booking[],
+    ReturnType<typeof bookingKeys.list>
+  >,
   'queryKey' | 'queryFn'
 >;
 

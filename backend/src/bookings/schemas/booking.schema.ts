@@ -18,7 +18,12 @@ export class Booking {
   @Prop({ required: true, type: Date })
   checkOut: Date;
 
-  @Prop({ required: true, enum: BookingStatus, default: BookingStatus.PENDING })
+  @Prop({
+    required: true,
+    type: String,
+    enum: BookingStatus,
+    default: BookingStatus.PENDING,
+  })
   status: BookingStatus;
 
   @Prop({ required: true, min: 0 })

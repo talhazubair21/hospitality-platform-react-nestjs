@@ -191,6 +191,50 @@ This keeps validation on both tiers, a single source of truth for ordering and t
 
 ---
 
+## Testing
+
+Automated tests are included so you can check booking logic and client helpers **before** starting MongoDB or the full app. The backend uses **Jest** with a mocked Mongoose model; the frontend uses **Vitest** with **Node** as the test environment (no browser required for the current suite).
+
+### Backend (Jest)
+
+| Area | What is tested |
+| ---- | -------------- |
+| `BookingsService` | `findAll` status filter vs “all”; `create` trims names and sets `pending`; `updateStatus` — invalid id, missing booking, no-op same status, allowed transition, blocked transition from terminal states |
+| `CreateBookingDto` | Valid payloads; missing guest name; negative `totalAmount`; check-out on/before check-in |
+
+From the `backend/` directory:
+
+```bash
+npm test              # run all tests once
+npm run test:watch    # re-run on file changes
+npm run test:cov      # run with coverage report (output under `coverage/`)
+npm run test:ci       # single run, CI-friendly (`--ci --runInBand`)
+```
+
+**Note:** Unit tests do **not** require `MONGODB_URI` or a running database.
+
+Test files live next to source as `*.spec.ts` (e.g. `bookings.service.spec.ts`, `dto/create-booking.dto.spec.ts`). Jest loads `src/test-setup.ts` so `reflect-metadata` works with decorators.
+
+### Frontend (Vitest)
+
+| Area | What is tested |
+| ---- | -------------- |
+| `createBookingSchema` | Happy path; required fields; check-out after check-in; non-negative amount |
+| `booking` types | `parseBookingStatus` normalization/aliases; `bookingFromApi` date parsing |
+| `errors.ts` | Network vs HTTP failures; server messages; list error panel / toast copy |
+
+From the `frontend/` directory:
+
+```bash
+npm test              # run all tests once (`vitest run`)
+npm run test:watch    # Vitest interactive watch
+npm run test:cov      # run with V8 coverage (output under `coverage/`)
+```
+
+Configuration merges `vite.config.ts` with `vitest.config.ts` so the same plugins apply in tests. Test files use the `*.test.ts` suffix under `src/`.
+
+---
+
 ## Scripts reference
 
 | Location   | Command | Purpose |
@@ -198,9 +242,16 @@ This keeps validation on both tiers, a single source of truth for ordering and t
 | `backend`  | `npm run build` | Compile Nest app |
 | `backend`  | `npm run start:dev` | Dev API with watch |
 | `backend`  | `npm run seed` | Load sample bookings (clears collection) |
+| `backend`  | `npm test` | Run Jest unit tests (bookings service + DTO validation) |
+| `backend`  | `npm run test:watch` | Jest in watch mode |
+| `backend`  | `npm run test:cov` | Jest with coverage report |
+| `backend`  | `npm run test:ci` | Jest once, CI-friendly (`--ci --runInBand`) |
 | `frontend` | `npm run build` | Typecheck + Vite production build |
 | `frontend` | `npm run dev` | Vite dev server |
 | `frontend` | `npm run lint` | ESLint |
+| `frontend` | `npm test` | Run Vitest (validation, types, API error helpers) |
+| `frontend` | `npm run test:watch` | Vitest watch mode |
+| `frontend` | `npm run test:cov` | Vitest with coverage |
 
 ---
 

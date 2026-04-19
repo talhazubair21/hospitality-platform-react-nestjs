@@ -254,9 +254,7 @@ export function BookingsTable({
         open={Boolean(pending)}
         guestName={pending?.booking.guestName ?? ''}
         currentLabel={
-          pending
-            ? statusLabel[parseBookingStatus(pending.booking.status)]
-            : ''
+          pending ? statusLabel[parseBookingStatus(pending.booking.status)] : ''
         }
         nextLabel={pending ? statusLabel[pending.nextStatus] : ''}
         onConfirm={() => void handleConfirmStatus()}
@@ -268,65 +266,66 @@ export function BookingsTable({
         {bookings.map((row) => {
           const status = parseBookingStatus(row.status);
           return (
-          <li
-            key={row.id}
-            className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-md shadow-slate-900/5 ring-1 ring-slate-200/50"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="font-semibold text-slate-900">{row.guestName}</p>
-                <p className="mt-0.5 text-sm text-slate-600">
-                  {row.propertyName}
-                </p>
+            <li
+              key={row.id}
+              className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-md shadow-slate-900/5 ring-1 ring-slate-200/50"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="font-semibold text-slate-900">
+                    {row.guestName}
+                  </p>
+                  <p className="mt-0.5 text-sm text-slate-600">
+                    {row.propertyName}
+                  </p>
+                </div>
+                <span
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[status]}`}
+                >
+                  {statusLabel[status]}
+                </span>
               </div>
-              <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[status]}`}
-              >
-                {statusLabel[status]}
-              </span>
-            </div>
-            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Check-in
-                </dt>
-                <dd className="mt-0.5 font-medium text-slate-800">
-                  {formatDate(row.checkIn)}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Check-out
-                </dt>
-                <dd className="mt-0.5 font-medium text-slate-800">
-                  {formatDate(row.checkOut)}
-                </dd>
-              </div>
-              <div className="col-span-2">
-                <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Total
-                </dt>
-                <dd className="mt-0.5 text-lg font-semibold tabular-nums text-slate-900">
-                  {money.format(row.totalAmount)}
-                </dd>
-              </div>
-            </dl>
-            {onChangeStatus && !isTerminalBookingStatus(status) ? (
-              <div className="mt-4 border-t border-slate-100 pt-4">
-                <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
-                  Update status
-                </p>
-                <StatusSelect
-                  row={row}
-                  onSelectNextStatus={handleSelectNextStatus}
-                  disabled={
-                    statusUpdatePending &&
-                    statusUpdateForBookingId === row.id
-                  }
-                />
-              </div>
-            ) : null}
-          </li>
+              <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+                <div>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Check-in
+                  </dt>
+                  <dd className="mt-0.5 font-medium text-slate-800">
+                    {formatDate(row.checkIn)}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Check-out
+                  </dt>
+                  <dd className="mt-0.5 font-medium text-slate-800">
+                    {formatDate(row.checkOut)}
+                  </dd>
+                </div>
+                <div className="col-span-2">
+                  <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Total
+                  </dt>
+                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-slate-900">
+                    {money.format(row.totalAmount)}
+                  </dd>
+                </div>
+              </dl>
+              {onChangeStatus && !isTerminalBookingStatus(status) ? (
+                <div className="mt-4 border-t border-slate-100 pt-4">
+                  <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
+                    Update status
+                  </p>
+                  <StatusSelect
+                    row={row}
+                    onSelectNextStatus={handleSelectNextStatus}
+                    disabled={
+                      statusUpdatePending && statusUpdateForBookingId === row.id
+                    }
+                  />
+                </div>
+              ) : null}
+            </li>
           );
         })}
       </ul>
@@ -387,47 +386,47 @@ export function BookingsTable({
               {bookings.map((row, index) => {
                 const status = parseBookingStatus(row.status);
                 return (
-                <tr
-                  key={row.id}
-                  className={`border-b border-slate-100 transition hover:bg-indigo-50/40 ${index === bookings.length - 1 ? 'border-b-0' : ''}`}
-                >
-                  <td className="whitespace-nowrap px-4 py-4 font-semibold text-slate-900 sm:px-5">
-                    {row.guestName}
-                  </td>
-                  <td className="max-w-[220px] px-4 py-4 text-slate-700 sm:px-5">
-                    <span className="line-clamp-2">{row.propertyName}</span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-4 text-slate-700 sm:px-5">
-                    {formatDate(row.checkIn)}
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-4 text-slate-700 sm:px-5">
-                    {formatDate(row.checkOut)}
-                  </td>
-                  <td className="px-4 py-4 sm:px-5">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[status]}`}
-                    >
-                      {statusLabel[status]}
-                    </span>
-                  </td>
-                  <td className="min-w-30 whitespace-nowrap px-4 py-4 text-right text-base font-semibold tabular-nums text-slate-900 sm:px-5">
-                    {money.format(row.totalAmount)}
-                  </td>
-                  {onChangeStatus ? (
-                    <td className="min-w-52 border-l border-slate-100 px-4 py-4 align-middle sm:px-5">
-                      {!isTerminalBookingStatus(status) ? (
-                        <StatusSelect
-                          row={row}
-                          onSelectNextStatus={handleSelectNextStatus}
-                          disabled={
-                            statusUpdatePending &&
-                            statusUpdateForBookingId === row.id
-                          }
-                        />
-                      ) : null}
+                  <tr
+                    key={row.id}
+                    className={`border-b border-slate-100 transition hover:bg-indigo-50/40 ${index === bookings.length - 1 ? 'border-b-0' : ''}`}
+                  >
+                    <td className="whitespace-nowrap px-4 py-4 font-semibold text-slate-900 sm:px-5">
+                      {row.guestName}
                     </td>
-                  ) : null}
-                </tr>
+                    <td className="max-w-[220px] px-4 py-4 text-slate-700 sm:px-5">
+                      <span className="line-clamp-2">{row.propertyName}</span>
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-4 text-slate-700 sm:px-5">
+                      {formatDate(row.checkIn)}
+                    </td>
+                    <td className="whitespace-nowrap px-4 py-4 text-slate-700 sm:px-5">
+                      {formatDate(row.checkOut)}
+                    </td>
+                    <td className="px-4 py-4 sm:px-5">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[status]}`}
+                      >
+                        {statusLabel[status]}
+                      </span>
+                    </td>
+                    <td className="min-w-30 whitespace-nowrap px-4 py-4 text-right text-base font-semibold tabular-nums text-slate-900 sm:px-5">
+                      {money.format(row.totalAmount)}
+                    </td>
+                    {onChangeStatus ? (
+                      <td className="min-w-52 border-l border-slate-100 px-4 py-4 align-middle sm:px-5">
+                        {!isTerminalBookingStatus(status) ? (
+                          <StatusSelect
+                            row={row}
+                            onSelectNextStatus={handleSelectNextStatus}
+                            disabled={
+                              statusUpdatePending &&
+                              statusUpdateForBookingId === row.id
+                            }
+                          />
+                        ) : null}
+                      </td>
+                    ) : null}
+                  </tr>
                 );
               })}
             </tbody>

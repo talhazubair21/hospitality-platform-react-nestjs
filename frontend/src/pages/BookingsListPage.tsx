@@ -30,9 +30,7 @@ function BookingsListLoader() {
           className="h-9 w-9 shrink-0 animate-spin rounded-full border-[3px] border-indigo-200 border-t-indigo-600"
           aria-hidden
         />
-        <p className="text-sm font-medium text-slate-600">
-          Loading bookings…
-        </p>
+        <p className="text-sm font-medium text-slate-600">Loading bookings…</p>
       </div>
     </div>
   );
@@ -70,7 +68,10 @@ export function BookingsListPage() {
         <span className="font-semibold tabular-nums text-slate-900">
           {filteredCount}
         </span>
-        <span className="text-slate-500"> booking{filteredCount === 1 ? '' : 's'}</span>
+        <span className="text-slate-500">
+          {' '}
+          booking{filteredCount === 1 ? '' : 's'}
+        </span>
         {statusFilter ? (
           <span className="text-slate-400"> (filtered)</span>
         ) : null}
@@ -177,9 +178,7 @@ export function BookingsListPage() {
             ∅
           </div>
           <p className="text-base font-medium text-slate-800">
-            {statusFilter
-              ? 'No bookings match this filter'
-              : 'No bookings yet'}
+            {statusFilter ? 'No bookings match this filter' : 'No bookings yet'}
           </p>
           <p className="mt-1 max-w-sm text-sm text-slate-500">
             {statusFilter

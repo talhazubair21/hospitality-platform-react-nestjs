@@ -58,7 +58,9 @@ export type BookingsListErrorPanel = {
   hint: string;
 };
 
-export function getBookingsListErrorPanel(error: unknown): BookingsListErrorPanel {
+export function getBookingsListErrorPanel(
+  error: unknown,
+): BookingsListErrorPanel {
   if (isLikelyNetworkFailure(error)) {
     return {
       title: "We can't reach the bookings API",
@@ -95,19 +97,17 @@ export function getBookingsListErrorPanel(error: unknown): BookingsListErrorPane
     return {
       title: "This request couldn't be completed",
       description:
-        serverMsg ??
-        'The server could not return bookings for this request.',
+        serverMsg ?? 'The server could not return bookings for this request.',
       hint: `Request failed with HTTP ${status}. Adjust filters or try again.`,
     };
   }
 
   return {
     title: 'Bookings could not be loaded',
-    description:
-      getApiErrorMessage(
-        error,
-        'Something went wrong while loading bookings.',
-      ),
+    description: getApiErrorMessage(
+      error,
+      'Something went wrong while loading bookings.',
+    ),
     hint: `Using API base URL: ${apiBaseUrl}.`,
   };
 }
@@ -167,7 +167,10 @@ export function toastMessageForBookingMutation(
   }
 
   if (kind === 'create') {
-    return getApiErrorMessage(error, "Couldn't create the booking. Please try again.");
+    return getApiErrorMessage(
+      error,
+      "Couldn't create the booking. Please try again.",
+    );
   }
   return getApiErrorMessage(
     error,
