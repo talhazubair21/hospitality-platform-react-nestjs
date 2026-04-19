@@ -22,7 +22,7 @@ export const DateField = forwardRef<HTMLInputElement, DateFieldProps>(
           ref={ref}
           id={id}
           type="date"
-          className={`min-h-11 ${fieldClass} [color-scheme:light] ${className}`}
+          className={`min-h-11 ${fieldClass} scheme-light ${className}`}
           aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? errorId : undefined}
           {...rest}

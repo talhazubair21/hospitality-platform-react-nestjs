@@ -10,6 +10,8 @@ export const mockBookings: Booking[] = [
     checkOut: parseISO('2026-05-04'),
     status: 'pending',
     totalAmount: 450,
+    createdAt: parseISO('2026-01-10T12:00:00Z'),
+    updatedAt: parseISO('2026-01-10T12:00:00Z'),
   },
   {
     id: '2',
@@ -19,6 +21,8 @@ export const mockBookings: Booking[] = [
     checkOut: parseISO('2026-05-13'),
     status: 'confirmed',
     totalAmount: 620.5,
+    createdAt: parseISO('2026-01-11T12:00:00Z'),
+    updatedAt: parseISO('2026-01-11T12:00:00Z'),
   },
   {
     id: '3',
@@ -28,6 +32,8 @@ export const mockBookings: Booking[] = [
     checkOut: parseISO('2026-04-23'),
     status: 'checked_in',
     totalAmount: 980,
+    createdAt: parseISO('2026-01-12T12:00:00Z'),
+    updatedAt: parseISO('2026-01-12T12:00:00Z'),
   },
   {
     id: '4',
@@ -37,6 +43,8 @@ export const mockBookings: Booking[] = [
     checkOut: parseISO('2026-03-05'),
     status: 'checked_out',
     totalAmount: 2100,
+    createdAt: parseISO('2026-01-13T12:00:00Z'),
+    updatedAt: parseISO('2026-01-13T12:00:00Z'),
   },
   {
     id: '5',
@@ -46,5 +54,7 @@ export const mockBookings: Booking[] = [
     checkOut: parseISO('2026-06-03'),
     status: 'cancelled',
     totalAmount: 199.99,
+    createdAt: parseISO('2026-01-14T12:00:00Z'),
+    updatedAt: parseISO('2026-01-14T12:00:00Z'),
   },
 ];

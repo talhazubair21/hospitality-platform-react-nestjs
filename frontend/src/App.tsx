@@ -74,6 +74,16 @@ export default function App() {
           duration: 4000,
           className:
             '!rounded-xl !border !border-slate-200/80 !bg-white/95 !text-slate-800 !shadow-lg !shadow-slate-900/10',
+          success: {
+            duration: 4000,
+            className:
+              '!rounded-xl !border !border-emerald-200/90 !bg-emerald-50/95 !text-emerald-950 !shadow-lg !shadow-emerald-900/10',
+          },
+          error: {
+            duration: 5500,
+            className:
+              '!max-w-[min(100vw-2rem,24rem)] !rounded-xl !border !border-rose-200/90 !bg-rose-50/95 !py-3 !text-sm !leading-snug !text-rose-950 !shadow-lg !shadow-rose-900/10',
+          },
         }}
       />
       <Routes>

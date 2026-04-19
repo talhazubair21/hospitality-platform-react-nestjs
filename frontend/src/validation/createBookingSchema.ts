@@ -1,4 +1,4 @@
-import { type InferType, object, number, string } from 'yup';
+import { object, number, string } from 'yup';
 
 export const createBookingSchema = object({
   guestName: string()
@@ -44,4 +44,11 @@ export const createBookingSchema = object({
   },
 });
 
-export type CreateBookingFormValues = InferType<typeof createBookingSchema>;
+/** Explicit shape so react-hook-form and yupResolver agree (Yup's InferType can widen fields optional with object-level tests). */
+export type CreateBookingFormValues = {
+  guestName: string;
+  propertyName: string;
+  checkIn: string;
+  checkOut: string;
+  totalAmount: number;
+};

@@ -1,10 +1,21 @@
 import { useCallback, useEffect, useState } from 'react';
 import { format, isValid } from 'date-fns';
-import type { Booking, BookingStatus } from '../../types/booking';
+import {
+  parseBookingStatus,
+  type Booking,
+  type BookingStatus,
+} from '../../types/booking';
 
 export type BookingsTableProps = {
   bookings: Booking[];
-  onChangeStatus?: (bookingId: string, status: BookingStatus) => void;
+  onChangeStatus?: (
+    bookingId: string,
+    status: BookingStatus,
+  ) => void | Promise<void>;
+  /** True while a status PATCH is in flight (React Query mutation). */
+  statusUpdatePending?: boolean;
+  /** Booking id being updated, when `statusUpdatePending`. */
+  statusUpdateForBookingId?: string | null;
 };
 
 const statusLabel: Record<BookingStatus, string> = {
@@ -35,17 +46,26 @@ const money = new Intl.NumberFormat('en-US', {
   currency: 'USD',
 });
 
+/** Terminal states: no status dropdown. */
+function isTerminalBookingStatus(status: BookingStatus): boolean {
+  return status === 'checked_out' || status === 'cancelled';
+}
+
 function nextStatusOptions(
-  current: BookingStatus,
+  current: BookingStatus | string,
 ): { value: BookingStatus; label: string }[] {
+  const normalized = parseBookingStatus(current);
   const map: Record<BookingStatus, BookingStatus[]> = {
-    pending: ['confirmed', 'cancelled'],
-    confirmed: ['checked_in', 'cancelled'],
-    checked_in: ['checked_out'],
+    /** All other statuses except pending */
+    pending: ['confirmed', 'checked_in', 'checked_out', 'cancelled'],
+    /** Next three in the flow */
+    confirmed: ['checked_in', 'checked_out', 'cancelled'],
+    /** Two options */
+    checked_in: ['checked_out', 'cancelled'],
     checked_out: [],
     cancelled: [],
   };
-  return (map[current] ?? []).map((v) => ({
+  return (map[normalized] ?? []).map((v) => ({
     value: v,
     label: `→ ${statusLabel[v]}`,
   }));
@@ -58,6 +78,7 @@ function StatusChangeConfirmModal({
   nextLabel,
   onConfirm,
   onCancel,
+  isUpdating,
 }: {
   open: boolean;
   guestName: string;
@@ -65,6 +86,7 @@ function StatusChangeConfirmModal({
   nextLabel: string;
   onConfirm: () => void;
   onCancel: () => void;
+  isUpdating: boolean;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -106,17 +128,25 @@ function StatusChangeConfirmModal({
         <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
           <button
             type="button"
-            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+            className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
             onClick={onCancel}
+            disabled={isUpdating}
           >
             Cancel
           </button>
           <button
             type="button"
-            className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-60"
             onClick={onConfirm}
+            disabled={isUpdating}
           >
-            Confirm update
+            {isUpdating ? (
+              <span
+                className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-white/80 border-t-transparent"
+                aria-hidden
+              />
+            ) : null}
+            {isUpdating ? 'Updating…' : 'Confirm update'}
           </button>
         </div>
       </div>
@@ -129,13 +159,19 @@ const STATUS_CONTROL_H = 'h-10';
 function StatusSelect({
   row,
   onSelectNextStatus,
+  disabled,
 }: {
   row: Booking;
   onSelectNextStatus: (row: Booking, status: BookingStatus) => void;
+  disabled?: boolean;
 }) {
-  const opts = nextStatusOptions(row.status);
-  const shell =
-    `flex w-full min-w-48 max-w-56 shrink-0 items-center ${STATUS_CONTROL_H}`;
+  const status = parseBookingStatus(row.status);
+  if (isTerminalBookingStatus(status)) {
+    return null;
+  }
+
+  const opts = nextStatusOptions(status);
+  const shell = `flex w-full min-w-48 max-w-56 shrink-0 items-center ${STATUS_CONTROL_H}`;
 
   if (opts.length === 0) {
     return (
@@ -147,8 +183,9 @@ function StatusSelect({
   return (
     <div className={shell}>
       <select
-        key={`${row.id}-${row.status}`}
-        className={`${STATUS_CONTROL_H} w-full min-h-0 cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-8 text-xs font-medium leading-none text-slate-800 shadow-sm outline-none ring-1 ring-slate-200/60 transition hover:border-slate-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25`}
+        key={`${row.id}-${parseBookingStatus(row.status)}`}
+        disabled={disabled}
+        className={`${STATUS_CONTROL_H} w-full min-h-0 cursor-pointer appearance-none rounded-lg border border-slate-200 bg-white px-3 pr-8 text-xs font-medium leading-none text-slate-800 shadow-sm outline-none ring-1 ring-slate-200/60 transition hover:border-slate-300 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/25 disabled:cursor-not-allowed disabled:opacity-50`}
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2364748b'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E")`,
           backgroundRepeat: 'no-repeat',
@@ -182,6 +219,8 @@ function StatusSelect({
 export function BookingsTable({
   bookings,
   onChangeStatus,
+  statusUpdatePending = false,
+  statusUpdateForBookingId = null,
 }: BookingsTableProps) {
   const [pending, setPending] = useState<{
     booking: Booking;
@@ -192,13 +231,20 @@ export function BookingsTable({
     setPending({ booking: row, nextStatus });
   };
 
-  const handleConfirmStatus = useCallback(() => {
-    setPending((p) => {
-      if (!p || !onChangeStatus) return p;
-      onChangeStatus(p.booking.id, p.nextStatus);
-      return null;
-    });
-  }, [onChangeStatus]);
+  const handleConfirmStatus = useCallback(async () => {
+    if (!pending || !onChangeStatus) return;
+    try {
+      await onChangeStatus(pending.booking.id, pending.nextStatus);
+      setPending(null);
+    } catch {
+      /* Error toast comes from booking API mutation */
+    }
+  }, [pending, onChangeStatus]);
+
+  const confirmUpdating =
+    Boolean(statusUpdatePending) &&
+    Boolean(pending) &&
+    statusUpdateForBookingId === pending?.booking.id;
 
   const handleCancelStatus = useCallback(() => setPending(null), []);
 
@@ -208,15 +254,20 @@ export function BookingsTable({
         open={Boolean(pending)}
         guestName={pending?.booking.guestName ?? ''}
         currentLabel={
-          pending ? statusLabel[pending.booking.status] : ''
+          pending
+            ? statusLabel[parseBookingStatus(pending.booking.status)]
+            : ''
         }
         nextLabel={pending ? statusLabel[pending.nextStatus] : ''}
-        onConfirm={handleConfirmStatus}
+        onConfirm={() => void handleConfirmStatus()}
         onCancel={handleCancelStatus}
+        isUpdating={confirmUpdating}
       />
       {/* Mobile: cards */}
       <ul className="grid gap-4 md:hidden">
-        {bookings.map((row) => (
+        {bookings.map((row) => {
+          const status = parseBookingStatus(row.status);
+          return (
           <li
             key={row.id}
             className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-5 shadow-md shadow-slate-900/5 ring-1 ring-slate-200/50"
@@ -229,9 +280,9 @@ export function BookingsTable({
                 </p>
               </div>
               <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[row.status]}`}
+                className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[status]}`}
               >
-                {statusLabel[row.status]}
+                {statusLabel[status]}
               </span>
             </div>
             <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -260,7 +311,7 @@ export function BookingsTable({
                 </dd>
               </div>
             </dl>
-            {onChangeStatus ? (
+            {onChangeStatus && !isTerminalBookingStatus(status) ? (
               <div className="mt-4 border-t border-slate-100 pt-4">
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-slate-500">
                   Update status
@@ -268,11 +319,16 @@ export function BookingsTable({
                 <StatusSelect
                   row={row}
                   onSelectNextStatus={handleSelectNextStatus}
+                  disabled={
+                    statusUpdatePending &&
+                    statusUpdateForBookingId === row.id
+                  }
                 />
               </div>
             ) : null}
           </li>
-        ))}
+          );
+        })}
       </ul>
 
       {/* Desktop: table — explicit column mins prevent header text from colliding */}
@@ -289,7 +345,7 @@ export function BookingsTable({
                 </th>
                 <th
                   scope="col"
-                  className="min-w-[10rem] whitespace-nowrap px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 sm:px-5"
+                  className="min-w-40 whitespace-nowrap px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 sm:px-5"
                 >
                   Property
                 </th>
@@ -307,13 +363,13 @@ export function BookingsTable({
                 </th>
                 <th
                   scope="col"
-                  className="min-w-[8.5rem] whitespace-nowrap px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 sm:px-5"
+                  className="min-w-34 whitespace-nowrap px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-500 sm:px-5"
                 >
                   Status
                 </th>
                 <th
                   scope="col"
-                  className="min-w-[7.5rem] whitespace-nowrap px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 sm:px-5"
+                  className="min-w-30 whitespace-nowrap px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 sm:px-5"
                 >
                   <span className="inline-block">Total</span>
                 </th>
@@ -328,7 +384,9 @@ export function BookingsTable({
               </tr>
             </thead>
             <tbody>
-              {bookings.map((row, index) => (
+              {bookings.map((row, index) => {
+                const status = parseBookingStatus(row.status);
+                return (
                 <tr
                   key={row.id}
                   className={`border-b border-slate-100 transition hover:bg-indigo-50/40 ${index === bookings.length - 1 ? 'border-b-0' : ''}`}
@@ -347,24 +405,31 @@ export function BookingsTable({
                   </td>
                   <td className="px-4 py-4 sm:px-5">
                     <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[row.status]}`}
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ring-1 ring-inset ${statusClass[status]}`}
                     >
-                      {statusLabel[row.status]}
+                      {statusLabel[status]}
                     </span>
                   </td>
-                  <td className="min-w-[7.5rem] whitespace-nowrap px-4 py-4 text-right text-base font-semibold tabular-nums text-slate-900 sm:px-5">
+                  <td className="min-w-30 whitespace-nowrap px-4 py-4 text-right text-base font-semibold tabular-nums text-slate-900 sm:px-5">
                     {money.format(row.totalAmount)}
                   </td>
                   {onChangeStatus ? (
                     <td className="min-w-52 border-l border-slate-100 px-4 py-4 align-middle sm:px-5">
-                      <StatusSelect
-                        row={row}
-                        onSelectNextStatus={handleSelectNextStatus}
-                      />
+                      {!isTerminalBookingStatus(status) ? (
+                        <StatusSelect
+                          row={row}
+                          onSelectNextStatus={handleSelectNextStatus}
+                          disabled={
+                            statusUpdatePending &&
+                            statusUpdateForBookingId === row.id
+                          }
+                        />
+                      ) : null}
                     </td>
                   ) : null}
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>

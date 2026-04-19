@@ -23,8 +23,16 @@ export class Booking {
 
   @Prop({ required: true, min: 0 })
   totalAmount: number;
+
+  /** Set automatically by Mongoose when `timestamps: true` (document creation time). */
+  @Prop({ type: Date })
+  createdAt: Date;
+
+  /** Set automatically by Mongoose when `timestamps: true` (last update time). */
+  @Prop({ type: Date })
+  updatedAt: Date;
 }
 
 export const BookingSchema = SchemaFactory.createForClass(Booking);
 
-BookingSchema.index({ status: 1, checkIn: -1 });
+BookingSchema.index({ status: 1, createdAt: -1 });

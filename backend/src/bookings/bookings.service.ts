@@ -12,12 +12,21 @@ import { UpdateBookingStatusDto } from './dto/update-booking-status.dto';
 import { Booking, BookingDocument } from './schemas/booking.schema';
 
 const ALLOWED_STATUS_TRANSITIONS: Record<BookingStatus, BookingStatus[]> = {
-  [BookingStatus.PENDING]: [BookingStatus.CONFIRMED, BookingStatus.CANCELLED],
-  [BookingStatus.CONFIRMED]: [
+  [BookingStatus.PENDING]: [
+    BookingStatus.CONFIRMED,
     BookingStatus.CHECKED_IN,
+    BookingStatus.CHECKED_OUT,
     BookingStatus.CANCELLED,
   ],
-  [BookingStatus.CHECKED_IN]: [BookingStatus.CHECKED_OUT],
+  [BookingStatus.CONFIRMED]: [
+    BookingStatus.CHECKED_IN,
+    BookingStatus.CHECKED_OUT,
+    BookingStatus.CANCELLED,
+  ],
+  [BookingStatus.CHECKED_IN]: [
+    BookingStatus.CHECKED_OUT,
+    BookingStatus.CANCELLED,
+  ],
   [BookingStatus.CHECKED_OUT]: [],
   [BookingStatus.CANCELLED]: [],
 };
@@ -31,7 +40,7 @@ export class BookingsService {
 
   async findAll(query: BookingQueryDto) {
     const filter = query.status ? { status: query.status } : {};
-    return this.bookingModel.find(filter).sort({ checkIn: -1 }).lean().exec();
+    return this.bookingModel.find(filter).sort({ createdAt: -1 }).lean().exec();
   }
 
   async create(dto: CreateBookingDto) {
