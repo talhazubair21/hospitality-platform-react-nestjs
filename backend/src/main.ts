@@ -26,4 +26,4 @@ async function bootstrap() {
   logger.log(`Server running on port ${port}`);
   logger.log(`MongoDB connected: ${mongoConnection.name}`);
 }
-bootstrap();
+void bootstrap();

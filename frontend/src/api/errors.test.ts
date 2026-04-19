@@ -61,19 +61,21 @@ describe('getApiErrorMessage', () => {
 });
 
 describe('getBookingsListErrorPanel', () => {
-  it('returns network-oriented copy when offline', () => {
+  it('returns generic copy when offline', () => {
     const panel = getBookingsListErrorPanel(
       axiosErr({ code: 'ERR_NETWORK', request: {} }),
     );
-    expect(panel.title).toContain('reach');
+    expect(panel.title).toBe('Something went wrong');
+    expect(panel.description).toContain('load bookings');
   });
 });
 
 describe('toastMessageForBookingsListError', () => {
-  it('mentions API URL for network failures', () => {
+  it('returns generic copy for network failures', () => {
     const msg = toastMessageForBookingsListError(
       axiosErr({ code: 'ERR_NETWORK', request: {} }),
     );
-    expect(msg).toMatch(/VITE_API_URL|localhost/);
+    expect(msg).toMatch(/try again/i);
+    expect(msg).not.toMatch(/localhost|VITE_API_URL/i);
   });
 });

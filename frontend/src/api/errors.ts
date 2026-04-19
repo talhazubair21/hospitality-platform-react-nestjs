@@ -1,5 +1,4 @@
 import { isAxiosError } from 'axios';
-import { apiBaseUrl } from './client';
 
 /** True when the request never reached a valid HTTP response (offline, wrong host, CORS, refused connection, timeout). */
 export function isLikelyNetworkFailure(error: unknown): boolean {
@@ -63,10 +62,9 @@ export function getBookingsListErrorPanel(
 ): BookingsListErrorPanel {
   if (isLikelyNetworkFailure(error)) {
     return {
-      title: "We can't reach the bookings API",
-      description:
-        'No response came back from the server. That usually means the backend is not running, the URL is wrong, or something on the network blocked the request.',
-      hint: `This app calls ${apiBaseUrl}. To use another host or port, set VITE_API_URL in a .env file at the project root, then restart the Vite dev server.`,
+      title: 'Something went wrong',
+      description: "We couldn't load bookings. Please try again.",
+      hint: 'If it continues, try again later.',
     };
   }
 
@@ -108,13 +106,13 @@ export function getBookingsListErrorPanel(
       error,
       'Something went wrong while loading bookings.',
     ),
-    hint: `Using API base URL: ${apiBaseUrl}.`,
+    hint: 'Please try again.',
   };
 }
 
 export function toastMessageForBookingsListError(error: unknown): string {
   if (isLikelyNetworkFailure(error)) {
-    return `Can't reach the server at ${apiBaseUrl}. Start the API or fix VITE_API_URL, then try again.`;
+    return "Couldn't load bookings. Please try again.";
   }
   const status = isAxiosError(error) ? error.response?.status : undefined;
   const serverMsg = extractServerMessage(error);
@@ -147,9 +145,9 @@ export function toastMessageForBookingMutation(
 ): string {
   if (isLikelyNetworkFailure(error)) {
     if (kind === 'create') {
-      return `Can't reach the server at ${apiBaseUrl}, so your booking wasn't saved. Start the API or fix VITE_API_URL, then try again.`;
+      return "Couldn't save your booking. Please try again.";
     }
-    return `Can't reach the server at ${apiBaseUrl}, so the status wasn't updated. Start the API or fix VITE_API_URL, then try again.`;
+    return "Couldn't update the status. Please try again.";
   }
 
   const status = isAxiosError(error) ? error.response?.status : undefined;

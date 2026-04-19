@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useState } from 'react';
 import { BookingsTable } from '../components/bookings/BookingsTable';
 import { SelectField, type SelectOption } from '../components/ui';
 import type { BookingStatus } from '../types/booking';
@@ -57,20 +57,17 @@ export function BookingsListPage() {
       ? updateStatus.variables.id
       : null;
 
-  const filteredCount = rows.length;
+  const bookingCount = rows.length;
 
-  const subtitle = useMemo(() => {
-    if (isLoading) {
-      return null;
-    }
-    return (
+  const subtitle =
+    isLoading ? null : (
       <p className="mt-3 text-sm text-slate-600">
         <span className="font-semibold tabular-nums text-slate-900">
-          {filteredCount}
+          {bookingCount}
         </span>
         <span className="text-slate-500">
           {' '}
-          booking{filteredCount === 1 ? '' : 's'}
+          booking{bookingCount === 1 ? '' : 's'}
         </span>
         {statusFilter ? (
           <span className="text-slate-400"> (filtered)</span>
@@ -82,7 +79,6 @@ export function BookingsListPage() {
         ) : null}
       </p>
     );
-  }, [filteredCount, isLoading, isFetching, statusFilter]);
 
   const handleStatusChange = async (
     bookingId: string,
@@ -172,7 +168,7 @@ export function BookingsListPage() {
         </div>
       ) : null}
 
-      {!isLoading && !isError && filteredCount === 0 ? (
+      {!isLoading && !isError && bookingCount === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300/80 bg-white/50 px-6 py-16 text-center shadow-inner">
           <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-2xl">
             ∅
@@ -188,7 +184,7 @@ export function BookingsListPage() {
         </div>
       ) : null}
 
-      {!isLoading && !isError && filteredCount > 0 ? (
+      {!isLoading && !isError && bookingCount > 0 ? (
         <BookingsTable
           bookings={rows}
           onChangeStatus={handleStatusChange}
